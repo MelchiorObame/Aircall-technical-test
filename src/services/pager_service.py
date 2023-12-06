@@ -2,10 +2,11 @@ import logging
 from src.models.alert import Alert
 from src.models.escalation_policy import EscalationPolicy
 from src.models.service import Service
-from src.models.target import Target
+from src.services.I_pager_service import IPagerService
 from src.utils.utils import NotificationType, ServiceState
 
-class PagerService:
+
+class PagerService(IPagerService):
     def __init__(self):
         self.services = {}  # {service_id: Service}
         self.policies = {}  # {service_id: EscalationPolicy}
@@ -13,23 +14,16 @@ class PagerService:
 
     def register_service(self, service: Service):
         self.services[service.id] = service
+        self.logger.info("service registration")
+
 
     def register_policy(self, ep: EscalationPolicy):
         self.policies[ep.service_id] = ep
-
-    
-    def on_alert_received(self, alert: Alert) -> None:
-        service = self.services.get(alert.service_id)
-        if service and service.state == ServiceState.Healthy:
-            service.mark_unhealthy()
-            self.notify_targets(service.id, 1)  # Assuming level 1 for first notification
-            self.set_acknowledgement_timer(service.id, 15 * 60)
+        self.logger.info("Policy registration")
 
 
-
-    def set_acknowledgement_timer(self, service_id:str, timeout):
+    def set_acknowledgement_timer(self, service_id:str, timeout)->None:
         self.logger.info(f"service {service_id}, timeout = {timeout} seconds")
-        pass
     
     
 
@@ -38,7 +32,6 @@ class PagerService:
         if not escalation_policy:
             self.logger.error(f"No escalation policy found for {service_id}")
             return
-
         targets = escalation_policy.get_targets_by_level(escalation_level)
         for target in targets:
             if target.type == NotificationType.SMS:
@@ -52,6 +45,14 @@ class PagerService:
 
 
     #------------ scenarios 
+
+    
+    def on_alert_received(self, alert: Alert) -> None:
+        service = self.services.get(alert.service_id)
+        if service and service.state == ServiceState.Healthy:
+            service.mark_unhealthy()
+            self.notify_targets(service.id, 1)  # Assuming level 1 for first notification
+            self.set_acknowledgement_timer(service.id, 15 * 60)
 
 
     def on_alert_ack_timeout(self, alert:Alert):
