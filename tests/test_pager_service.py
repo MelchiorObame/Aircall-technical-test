@@ -58,7 +58,7 @@ class TestPagerService(unittest.TestCase):
         alert = Alert('service_1', 'problème résolu!')
         self.pager_service.on_alert_ack_received(alert)
         mock_notify_targets.assert_not_called()
-        
+
 
     @patch('src.services.pager_service.PagerService.notify_targets')
     def test_unhealthy_service_receives_alert(self, mock_notify_targets):
