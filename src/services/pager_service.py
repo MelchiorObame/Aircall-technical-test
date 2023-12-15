@@ -7,6 +7,7 @@ from src.utils.utils import NotificationType, ServiceState
 
 
 class PagerService(IPagerService):
+    
     def __init__(self):
         self.services = {}  # {service_id: Service}
         self.policies = {}  # {service_id: EscalationPolicy}
@@ -25,7 +26,6 @@ class PagerService(IPagerService):
     def set_acknowledgement_timer(self, service_id:str, timeout)->None:
         self.logger.info(f"service {service_id}, timeout = {timeout} seconds")
     
-    
 
     def notify_targets(self, service_id: str, escalation_level: int): 
         escalation_policy = self.policies.get(service_id)
@@ -40,6 +40,9 @@ class PagerService(IPagerService):
             elif target.type == NotificationType.EMAIL:
                 # self.email_adapter.send_notification(target)
                 pass  # Simulate email notification
+            elif target.type == NotificationType.SLACK:
+                #
+                pass 
             else:
                 self.logger.error("Unsupported notification type")
 

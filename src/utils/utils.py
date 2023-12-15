@@ -8,5 +8,6 @@ class ServiceState(Enum):
 class NotificationType(Enum):
     SMS = 'SMS'
     EMAIL = 'EMAIL'
+    SLACK = 'SLACK'
 
 
